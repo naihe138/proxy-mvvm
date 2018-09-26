@@ -5,7 +5,7 @@
 
 例如：
 
-````
+````js
 var obj = new Proxy({}, {
   get: function (target, key, receiver) {
     console.log(`getting ${key}!`);
@@ -20,7 +20,7 @@ var obj = new Proxy({}, {
 
 上面代码对一个空对象架设了一层拦截，重定义了属性的读取（get）和设置（set）行为。这里暂时先不解释具体的语法，只看运行结果。对设置了拦截行为的对象obj，去读写它的属性，就会得到下面的结果。
 
-````
+````js
 obj.count = 1
 //  setting count!
 ++obj.count
@@ -29,7 +29,7 @@ obj.count = 1
 //  2
 ````
 
-````
+````js
 var proxy = new Proxy(target, handler);
 ````
 这里有两个参数，`target`参数表示所要拦截的目标对象，`handler`参数也是一个对象，用来定制拦截行为。
@@ -51,7 +51,7 @@ var proxy = new Proxy(target, handler);
 
 看到上面的图片，首先我们新建一个`index.html`，然后里面的代码是这样子滴。很简单
 
-````
+````html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,7 +103,7 @@ const mvvm = new Mvvm({
 
 首先声明一个`Mvvm`函数，`options`当作参数传进来，`options`就是上面代码的配置啦，里面有`el`、`data`、`computed`~~
 
-````
+````js
 function Mvvm(options = {}) {
     // 把options 赋值给this.$options
     this.$options = options
@@ -118,7 +118,7 @@ function Mvvm(options = {}) {
 
 下面继续写initVm函数，
 
-````
+````js
 
 function initVm () {
     this._vm = new Proxy(this, {
@@ -144,7 +144,7 @@ function initVm () {
 
 做好这些各种拦截工作。我们就可以直接从实力上访问到我们相对应的值了。（mvvm使我们第一块代码生成的实例）
 
-````
+````js
 mvvm.b // 2
 mvvm.a // 1
 mvvm.language // "Javascript"
@@ -163,7 +163,7 @@ mvvm.language // "Javascript"
 
 我们首先在`Mvvm`里面加一个`initObserve`，如下
 
-````
+````js
 function Mvvm(options = {}) {
     this.$options = options
     let data = this._data = this.$options.data
@@ -174,7 +174,7 @@ function Mvvm(options = {}) {
 ````
 `initObserve`这个函数主要是把，`this._data`都加上代理。如下
 
-````
+````js
 
 function initObserve(data) {
     this._data = observe(data) // 把所有observe都赋值到 this._data
@@ -188,7 +188,7 @@ function observe(data) {
 ````
 下面主要实现Observe类
 
-````
+````js
 // Observe类
 class Observe {
     constructor(data) {
@@ -233,7 +233,7 @@ class Observe {
 
 然后在Mvvm函数中增加一个编译函数，➕号表示是添加的函数
 
-```
+```js
 function Mvvm(options = {}) {
     this.$options = options
     let data = this._data = this.$options.data
@@ -245,7 +245,7 @@ function Mvvm(options = {}) {
 
 上面我们添加了一个`Compile`的构造函数。把配置的`el`作为参数传机进来，把生成`proxy`的实例`vm`也传进去，这样子我们就可以拿到`vm`下面的数据嘛，下面我们就去实现它。顺序读注释就可以了，很好理解
 
-````
+````js
 // 编译类
 class Compile {
     constructor (el, vm) {
@@ -302,7 +302,7 @@ class Compile {
 
 例如：举个很直白的例子
 
-````
+````js
 let arr = [] 
 let a = () => {console.log('a')}
 
@@ -334,7 +334,7 @@ class Dep {
 ````
 订阅发布是写好了，但是在什么时候订阅，什么时候发布？？这时候，我们是在数据获取的时候订阅`watcher`，然后在数据设置的时候发布`watcher`，在`Observe`类里面里面,看➕号的代码。 .
 
-````
+````js
 ... //省略代码
 ...
 proxy(data) {
@@ -369,7 +369,7 @@ proxy(data) {
 
 看详细注释
 
-```
+```js
 // Watcher类
 class Watcher {
     constructor (vm, exp, fn) {
@@ -439,7 +439,7 @@ function replaceTxt() {
 
 看到我们html里面有个`<input placeholder="123" v-module="language" />`，`v-module`绑定了一个`language`，然后在`Compile类`里面的`replace函数`，我们加上
 
-````
+````js
 replace(frag) {
     let vm = this.vm
     Array.from(frag.childNodes).forEach(node => {
@@ -481,7 +481,7 @@ replace(frag) {
 先把`<p>计算属性：{{sum}}</p>`注释去掉，以为上面一开始initVm函数里面，我们加了这个代码`return this[key] || this._data[key] || this._computed[key]`，到这里大家都明白了，只需要把this._computed也加一个watcher就好了。
 
 
-````
+````js
 function Mvvm(options = {}) {
     this.$options = options
     let data = this._data = this.$options.data
@@ -526,7 +526,7 @@ this._vm改变 ---> vm.set() ---> notify() -->update()-->更新界面
 
 添加mounted也很简单
 
-````
+````js
 // 写法和Vue一样
 let mvvm = new Mvvm({
     el: '#app',
@@ -547,7 +547,7 @@ let mvvm = new Mvvm({
 在new Mvvm里面添加mounted，
 然后到function Mvvm里面加上
 
-````
+````js
 function Mvvm(options = {}) {
     this.$options = options
     let data = this._data = this.$options.data
